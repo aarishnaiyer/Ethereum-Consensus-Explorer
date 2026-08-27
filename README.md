@@ -4,13 +4,11 @@ An interactive block explorer for Ethereum's **consensus layer** (the Beacon Cha
 
 Built from scratch in vanilla JavaScript, no frameworks.
 
-<!-- Add once deployed:
-**[Live demo](https://your-url-here)**
--->
 
-<!-- A screenshot goes a long way here. Drop an image in the repo and reference it:
-![Slot Explorer showing a finalized block](screenshot.png)
--->
+[Live demo](https:aarishnaiyer.github.io/Ethereum-Consensus-Explorer/)**
+
+
+[Ethereum Consensus Explorer showing a finalized beacon-chain block with 128 attestations](screenshot.png)
 
 ## What it does
 
