@@ -8,7 +8,7 @@ Built from scratch in vanilla JavaScript, no frameworks.
 [Live demo](https:aarishnaiyer.github.io/Ethereum-Consensus-Explorer/)
 
 
-[Ethereum Consensus Explorer showing a finalized beacon-chain block with 128 attestations](screenshot.png)
+![Ethereum Consensus Explorer showing a finalized beacon-chain block with 128 attestations](screenshot.png)
 
 ## What it does
 
