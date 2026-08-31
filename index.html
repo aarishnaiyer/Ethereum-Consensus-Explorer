@@ -287,7 +287,7 @@
             </div>
         </header>
         <div class="search">
-            <input id="slotInput" placeholder="slot number, e.g. 15065085 — or leave blank for head">
+            <input  id="slotInput" aria-label="Slot number" placeholder="slot number, e.g. 15065085 — or leave blank for head">
             <button id="search">Search</button>
         </div>
     
@@ -351,6 +351,12 @@
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
     
             const json = await res.json();
+            const scRes = await fetch(`${BEACON}/eth/v1/beacon/states/${blockId}/sync_committees`);
+            const scJson = await scRes.json();
+            const validators = scJson.data.validators; 
+            const validatorsShown = validators.slice(0,16);
+            const scRows = validatorsShown.map(v => 
+              `<div class="att-row"><span class = "att-v">validator ${v}</span></div>`).join("");
             const msg  = json.data.message;
             const atts = msg.body.attestations || [];
             const epoch = Math.floor(Number(msg.slot) / 32);
@@ -397,7 +403,15 @@
                 <span class="atts-count">${fmt(atts.length)}</span>
                 </div>
                 <div class="atts-list">${rows || '<div class="state-sub">No attestations in this block.</div>'}${more}</div>
-            </section>`;
+            </section>
+            <section class ="panel fade">
+              <div class ="atts-head">
+                <span class = "atts-title">Sync Committee</span>
+                <span class = "atts-count">${validators.length}</span>
+              </div>
+              <div class ="atts-list">${scRows}</div>
+            </section>
+            `;
         } catch (err) {
             errorView(err.message);
             console.error(err);
