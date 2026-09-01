@@ -273,6 +273,21 @@
         @media (prefers-reduced-motion: reduce) {
         * { animation: none !important; transition: none !important; }
         }
+        .sc-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+          gap: 8px;
+        }
+        .sc-chip{
+          background: var(--panel-2);
+          border: 1px solid var(--border-soft);
+          border-radius: 8px;
+          padding: 8px 10px;
+          font-family: "IBM Plex Mono", monospace;
+          font-size: 13px;
+          color: var(--hash);
+          text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -287,7 +302,7 @@
             </div>
         </header>
         <div class="search">
-            <input  id="slotInput" aria-label="Slot number" placeholder="slot number, e.g. 15065085 — or leave blank for head">
+            <input  id="slotInput" aria-label="Slot number" placeholder="slot number, e.g. 15065085 or leave blank for head">
             <button id="search">Search</button>
         </div>
     
@@ -351,12 +366,28 @@
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
     
             const json = await res.json();
-            const scRes = await fetch(`${BEACON}/eth/v1/beacon/states/${blockId}/sync_committees`);
-            const scJson = await scRes.json();
-            const validators = scJson.data.validators; 
-            const validatorsShown = validators.slice(0,16);
-            const scRows = validatorsShown.map(v => 
-              `<div class="att-row"><span class = "att-v">validator ${v}</span></div>`).join("");
+            // Sync committee lives in the STATE, and nodes prune old states (blocks are
+            // archived, states aren't). So fetch it defensively: if it fails, skip the
+            // panel instead of blowing up the whole page.
+            let scPanel = "";
+            try {
+              const scRes = await fetch(`${BEACON}/eth/v1/beacon/states/${blockId}/sync_committees`);
+              if (scRes.ok) {
+                const scJson = await scRes.json();
+                const validators = scJson.data.validators;
+                const scRows = validators.slice(0, 16).map(v => `<div class="sc-chip">${v}</div>`).join("");
+                scPanel = `
+                  <section class="panel fade">
+                    <div class="atts-head">
+                      <span class="atts-title">Sync Committee</span>
+                      <span class="atts-count">${validators.length}</span>
+                    </div>
+                    <div class="sc-grid">${scRows}</div>
+                  </section>`;
+              }
+            } catch (e) {
+              console.warn("Sync committee unavailable for this slot:", e.message);
+            }
             const msg  = json.data.message;
             const atts = msg.body.attestations || [];
             const epoch = Math.floor(Number(msg.slot) / 32);
@@ -404,13 +435,7 @@
                 </div>
                 <div class="atts-list">${rows || '<div class="state-sub">No attestations in this block.</div>'}${more}</div>
             </section>
-            <section class ="panel fade">
-              <div class ="atts-head">
-                <span class = "atts-title">Sync Committee</span>
-                <span class = "atts-count">${validators.length}</span>
-              </div>
-              <div class ="atts-list">${scRows}</div>
-            </section>
+            ${scPanel}
             `;
         } catch (err) {
             errorView(err.message);
